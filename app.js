@@ -1,92 +1,81 @@
-/* ===============================
-   OpenNotes – Firebase (Browser)
-   =============================== */
-
-// Firebase CDN imports (browser safe)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, getDoc, setDoc } 
-  from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-/* ===============================
-   Firebase Config (YOUR PROJECT)
-   =============================== */
-
+// 🔴 PASTE YOUR FIREBASE CONFIG HERE
 const firebaseConfig = {
-  apiKey: "AIzaSyDV0x3hXbyTLXwFytOuPgK7lNMnv_PonfA",
-  authDomain: "ep13-85d3a.firebaseapp.com",
-  projectId: "ep13-85d3a",
-  storageBucket: "ep13-85d3a.appspot.com",
-  messagingSenderId: "92916303653",
-  appId: "1:92916303653:web:5f06a01139ea688de9fccc"
+  apiKey: "PASTE_API_KEY",
+  authDomain: "PASTE_AUTH_DOMAIN",
+  projectId: "PASTE_PROJECT_ID",
+  storageBucket: "PASTE_STORAGE_BUCKET",
+  messagingSenderId: "PASTE_SENDER_ID",
+  appId: "PASTE_APP_ID"
 };
 
-// Init Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ===============================
-   LOAD NOTES (MAIN PAGE)
-   =============================== */
+const search = document.getElementById("search");
+const results = document.getElementById("results");
+const subjectsBox = document.getElementById("subjects");
 
 let NOTES = [];
+let SUBJECTS = new Set();
 
-async function loadNotes() {
+// LOAD ALL NOTES
+async function loadNotes(){
   NOTES = [];
-  const snap = await getDocs(collection(db, "notes"));
-  snap.forEach(d => {
-    NOTES.push({ id: d.id, ...d.data() });
+  SUBJECTS.clear();
+  const snap = await getDocs(collection(db,"notes"));
+  snap.forEach(d=>{
+    const data = d.data();
+    NOTES.push({id:d.id,...data});
+    if(data.subject) SUBJECTS.add(data.subject);
   });
-  renderNotes(NOTES);
+  renderSubjects();
 }
 
-/* ===============================
-   SEARCH
-   =============================== */
-
-const searchBox = document.getElementById("searchBox");
-const noteList = document.getElementById("noteList");
-
-if (searchBox) {
-  searchBox.addEventListener("input", () => {
-    const q = searchBox.value.toLowerCase();
-    renderNotes(
-      NOTES.filter(n =>
-        n.id.toLowerCase().includes(q) ||
-        n.title.toLowerCase().includes(q) ||
-        n.text.toLowerCase().includes(q)
-      )
-    );
+function renderSubjects(){
+  subjectsBox.innerHTML="";
+  if(SUBJECTS.size===0){
+    subjectsBox.innerHTML="<div class='empty'>No subjects</div>";
+    return;
+  }
+  SUBJECTS.forEach(s=>{
+    const div=document.createElement("div");
+    div.className="subject";
+    div.textContent=s;
+    subjectsBox.appendChild(div);
   });
 }
 
-/* ===============================
-   RENDER NOTES
-   =============================== */
+// SEARCH (ONLY WHAT EXISTS)
+search.addEventListener("input",()=>{
+  const q = search.value.trim().toLowerCase();
+  results.innerHTML="";
+  if(!q) return;
 
-function renderNotes(list) {
-  if (!noteList) return;
-  noteList.innerHTML = "";
+  const found = NOTES.filter(n =>
+    (n.title||"").toLowerCase().includes(q) ||
+    (n.content||"").toLowerCase().includes(q) ||
+    (n.subject||"").toLowerCase().includes(q) ||
+    (n.folder||"").toLowerCase().includes(q)
+  );
 
-  if (list.length === 0) {
-    noteList.innerHTML = "<p>No notes found</p>";
+  if(found.length===0){
+    results.innerHTML="<div class='result'>No notes found</div>";
     return;
   }
 
-  list.forEach(n => {
-    const div = document.createElement("div");
-    div.className = "note-item";
-    div.innerText = `${n.subject} → ${n.category} → ${n.title}`;
-    div.onclick = () => {
-      window.location.href = `notes.html?id=${n.id}`;
-    };
-    noteList.appendChild(div);
+  found.forEach(n=>{
+    const div=document.createElement("div");
+    div.className="result";
+    div.innerHTML = `
+      <b>${n.title || "Untitled"}</b><br>
+      <small>${n.subject || ""}${n.folder ? " → "+n.folder : ""}</small>
+    `;
+    div.onclick=()=>location.href=`notes.html?id=${n.id}`;
+    results.appendChild(div);
   });
-}
+});
 
-/* ===============================
-   AUTO LOAD (main.html only)
-   =============================== */
-
-if (noteList) {
-  loadNotes();
-}
+loadNotes();
