@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OpenNotes</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Montserrat',sans-serif;
+}
+
+body{
+  background:#000;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* ===== BACKGROUND ===== */
+.app-bg{
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at top,#111,#000);
+  transition:.5s;
+}
+
+.app-bg.blur{filter:blur(7px);}
+
+/* ===== CARD ===== */
+.card{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:340px;
+  background:#ff66a3;
+  border:3px solid #000;
+  box-shadow:12px 12px 0 #000;
+  z-index:2;
+  transition:.5s;
+}
+
+.card.blue{background:#1e90ff;}
+
+.card-head{
+  background:#fff;
+  color:#000;
+  padding:6px 12px;
+  font-weight:800;
+  border-bottom:3px solid #000;
+}
+
+.card-body{
+  padding:14px;
+  font-weight:600;
+  color:#000;
+}
+
+.card-body h1{font-size:18px;margin-bottom:6px;}
+
+.enter-btn{
+  margin-top:14px;
+  padding:6px 14px;
+  border:3px solid #000;
+  box-shadow:3px 3px 0 #000;
+  background:#4ade80;
+  font-weight:800;
+  cursor:pointer;
+}
+
+/* ===== KEY POPUP ===== */
+.key-popup{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:rgba(0,0,0,.4);
+  backdrop-filter:blur(7px);
+  opacity:0;
+  pointer-events:none;
+  transition:.4s;
+  z-index:5;
+}
+
+.key-popup.show{
+  opacity:1;
+  pointer-events:auto;
+}
+
+/* ===== INPUT ===== */
+.brutalist-container{position:relative;}
+
+.brutalist-input{
+  width:300px;
+  padding:14px;
+  font-size:18px;
+  font-weight:800;
+  border:4px solid #000;
+  box-shadow:5px 5px 0 #000,10px 10px 0 #4a90e2;
+  outline:none;
+}
+
+.brutalist-label{
+  position:absolute;
+  top:-30px;
+  left:-2px;
+  background:#000;
+  color:#fff;
+  padding:5px 10px;
+  font-size:14px;
+}
+
+.error{
+  display:none;
+  margin-top:10px;
+  color:red;
+  font-size:14px;
+  text-align:center;
+}
+
+/* ===== MAIN APP ===== */
+.app{
+  position:absolute;
+  inset:0;
+  display:none;
+  z-index:1;
+}
+
+.app.show{display:block;}
+
+</style>
+</head>
+<body>
+
+<div class="app-bg" id="bg"></div>
+
+<!-- CARD -->
+<div class="card" id="card">
+  <div class="card-head">OPENNOTES ACCESS</div>
+  <div class="card-body">
+    <h1>HI, ACCESS REQUIRED</h1>
+    Enter to edit notes
+    <br>
+    <button class="enter-btn" onclick="openKey()">ENTER</button>
+  </div>
+</div>
+
+<!-- KEY INPUT -->
+<div class="key-popup" id="keyPopup">
+  <div>
+    <div class="brutalist-container">
+      <input id="keyInput" class="brutalist-input" placeholder="TYPE KEY" />
+      <label class="brutalist-label">enter KEY</label>
+    </div>
+    <div class="error" id="error">WRONG KEY</div>
+    <div style="text-align:center;margin-top:14px">
+      <button class="enter-btn" onclick="unlock()">UNLOCK</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP PLACEHOLDER -->
+<div class="app" id="app"></div>
+
+<script>
+const KEY='1608';
+
+function openKey(){
+  document.getElementById('bg').classList.add('blur');
+  document.getElementById('card').classList.add('blue');
+  document.getElementById('keyPopup').classList.add('show');
+}
+
+function unlock(){
+  const val=document.getElementById('keyInput').value;
+  if(val===KEY){
+    document.getElementById('keyPopup').classList.remove('show');
+    document.getElementById('card').style.display='none';
+    document.getElementById('bg').classList.remove('blur');
+    document.getElementById('app').classList.add('show');
+  }else{
+    document.getElementById('error').style.display='block';
+  }
+}
+</script>
+
+</body>
+</html>
