@@ -143,8 +143,8 @@ body{
 <div class="card" id="card">
   <div class="card-head">OPENNOTES ACCESS</div>
   <div class="card-body">
-    <h1>HI, ACCESS REQUIRED</h1>
-    Enter to edit notes
+    <h1>HI, I AM NEWTON</h1>
+    IF U WANT TO ACCESS THE WEB THEN USE THE KEY
     <br>
     <button class="enter-btn" onclick="openKey()">ENTER</button>
   </div>
@@ -168,7 +168,7 @@ body{
 <div class="app" id="app"></div>
 
 <script>
-const KEY='1608';
+const KEY = '1608';
 
 function openKey(){
   document.getElementById('bg').classList.add('blur');
@@ -177,14 +177,20 @@ function openKey(){
 }
 
 function unlock(){
-  const val=document.getElementById('keyInput').value;
-  if(val===KEY){
+  const val = document.getElementById('keyInput').value;
+
+  if(val === KEY){
+    // smooth exit effect (optional)
     document.getElementById('keyPopup').classList.remove('show');
-    document.getElementById('card').style.display='none';
-    document.getElementById('bg').classList.remove('blur');
-    document.getElementById('app').classList.add('show');
-  }else{
-    document.getElementById('error').style.display='block';
+    document.getElementById('card').style.opacity = '0';
+
+    // redirect to main page
+    setTimeout(() => {
+      window.location.href = "main.html";
+    }, 400);
+
+  } else {
+    document.getElementById('error').style.display = 'block';
   }
 }
 </script>
