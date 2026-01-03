@@ -1,46 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>OpenNotes | Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Montserrat',sans-serif}
-body{background:#000;color:#fff;height:100vh;overflow:hidden}
 
-/* LAYOUT */
-.app{display:flex;height:100vh}
+body{
+  height:100vh;
+  background:radial-gradient(circle at top,#0d1b2a,#000);
+  color:#eaf2ff;
+  overflow:hidden;
+}
 
-/* SIDEBAR */
-.sidebar{width:260px;background:#0d0d0d;border-right:2px solid #222;padding:14px;overflow-y:auto}
-.sidebar h2{font-size:18px;margin-bottom:14px}
-.folder{margin-bottom:10px;cursor:pointer}
-.folder>span{display:block;padding:8px 10px;background:#1a1a1a;border-radius:4px;font-weight:600}
-.sub{margin-left:12px;margin-top:6px;display:none}
-.sub span{display:block;padding:6px 8px;margin-bottom:4px;background:#111;border-radius:4px;font-size:14px;cursor:pointer}
+/* ===== TOP BAR ===== */
+.topbar{
+  height:56px;
+  display:flex;
+  align-items:center;
+  padding:0 18px;
+  background:rgba(20,30,50,.55);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(120,170,255,.25);
+}
 
-/* CONTENT */
-.content{flex:1;padding:20px;overflow-y:auto}
-.topbar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.search{flex:1;padding:10px 12px;font-size:16px;background:#111;border:2px solid #333;color:#fff}
+.topbar h1{
+  font-size:18px;
+  letter-spacing:1px;
+  font-weight:800;
+}
 
-.note-list{margin-top:10px}
-.note-item{padding:12px;border:2px solid #222;border-radius:6px;margin-bottom:10px;background:#0f0f0f;cursor:pointer}
-.note-item:hover{background:#151515}
+/* ===== LAYOUT ===== */
+.app{display:flex;height:calc(100vh - 56px)}
 
-/* MOBILE */
-@media(max-width:768px){.sidebar{width:200px}}
+/* ===== SIDEBAR ===== */
+.sidebar{
+  width:260px;
+  padding:16px;
+  background:rgba(10,20,40,.55);
+  backdrop-filter:blur(14px);
+  border-right:1px solid rgba(120,170,255,.25);
+}
+
+.sidebar h2{font-size:16px;margin-bottom:12px;opacity:.85}
+
+.folder{
+  margin-bottom:10px;
+  cursor:pointer;
+}
+
+.folder span{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:rgba(40,80,160,.18);
+  border:1px solid rgba(120,170,255,.25);
+}
+
+.sub{
+  display:none;
+  margin-left:10px;
+  margin-top:6px;
+}
+
+.sub span{
+  display:flex;
+  padding:8px 12px;
+  margin-bottom:6px;
+  border-radius:10px;
+  background:rgba(20,40,90,.3);
+  border:1px solid rgba(120,170,255,.18);
+}
+
+/* ===== CONTENT ===== */
+.content{flex:1;padding:22px;overflow-y:auto}
+
+.search-wrap{
+  position:relative;
+  margin-bottom:18px;
+}
+
+.search{
+  width:100%;
+  padding:14px 16px;
+  border-radius:14px;
+  font-size:16px;
+  color:#eaf2ff;
+  background:rgba(20,40,90,.45);
+  border:1px solid rgba(120,170,255,.35);
+  outline:none;
+}
+
+.results{
+  margin-top:12px;
+  background:rgba(10,20,40,.55);
+  border-radius:16px;
+  border:1px solid rgba(120,170,255,.3);
+  backdrop-filter:blur(14px);
+}
+
+.result-item{
+  padding:14px 16px;
+  border-bottom:1px solid rgba(120,170,255,.15);
+  cursor:pointer;
+}
+
+.result-item:last-child{border-bottom:none}
+
+.result-item small{opacity:.7;font-size:12px}
+
+.result-item:hover{background:rgba(60,120,255,.15)}
+
+/* ===== MOBILE ===== */
+@media(max-width:768px){
+  .sidebar{width:200px}
+}
 </style>
 </head>
 <body>
 
+<div class="topbar">
+  <h1>OPENNOTES</h1>
+</div>
+
 <div class="app">
+
+  <!-- SIDEBAR -->
   <aside class="sidebar">
     <h2>Subjects</h2>
 
     <div class="folder" onclick="toggle(this)">
-      <span>Physics</span>
+      <span>📁 Physics</span>
       <div class="sub">
         <span onclick="openNote('phy-f-ch1-mechanics')">Formula</span>
         <span onclick="openNote('phy-n-ch2-optics')">Notes</span>
@@ -48,21 +142,26 @@ body{background:#000;color:#fff;height:100vh;overflow:hidden}
     </div>
   </aside>
 
+  <!-- CONTENT -->
   <main class="content">
-    <div class="topbar">
-      <input class="search" id="searchBox" placeholder="Search notes...">
+    <div class="search-wrap">
+      <input id="searchBox" class="search" placeholder="Search (e.g. phy-c-ch1)" />
     </div>
 
-    <div class="note-list" id="noteList">
-      <div class="note-item" onclick="openNote('phy-f-ch1-mechanics')">Physics → Formula → Mechanics</div>
-      <div class="note-item" onclick="openNote('phy-n-ch2-optics')">Physics → Notes → Optics</div>
-    </div>
+    <div class="results" id="noteList"></div>
   </main>
+
 </div>
 
+<script type="module" src="app.js"></script>
 <script>
-function toggle(el){const sub=el.querySelector('.sub');sub.style.display=sub.style.display==='block'?'none':'block'}
-function openNote(id){window.location.href='notes.html?id='+id}
+function toggle(el){
+  const sub=el.querySelector('.sub');
+  if(sub) sub.style.display=sub.style.display==='block'?'none':'block';
+}
+function openNote(id){
+  window.location.href=`notes.html?id=${id}`;
+}
 </script>
 
 </body>
