@@ -1,126 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>OpenNotes | Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Montserrat',sans-serif}
+<meta charset="UTF-8">
+<title>OpenNotes</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{
   height:100vh;
   background:radial-gradient(circle at top,#0d1b2a,#000);
   color:#eaf2ff;
-  overflow:hidden;
 }
-
-/* ===== TOP BAR ===== */
 .topbar{
   height:56px;
   display:flex;
   align-items:center;
-  padding:0 18px;
-  background:rgba(20,30,50,.55);
-  backdrop-filter:blur(12px);
+  padding:0 20px;
+  background:rgba(20,30,50,.7);
   border-bottom:1px solid rgba(120,170,255,.25);
 }
+.topbar h1{font-size:18px}
 
-.topbar h1{
-  font-size:18px;
-  letter-spacing:1px;
-  font-weight:800;
-}
-
-/* ===== LAYOUT ===== */
 .app{display:flex;height:calc(100vh - 56px)}
 
-/* ===== SIDEBAR ===== */
 .sidebar{
   width:260px;
   padding:16px;
-  background:rgba(10,20,40,.55);
-  backdrop-filter:blur(14px);
+  background:rgba(10,20,40,.6);
   border-right:1px solid rgba(120,170,255,.25);
 }
-
-.sidebar h2{font-size:16px;margin-bottom:12px;opacity:.85}
-
-.folder{
-  margin-bottom:10px;
-  cursor:pointer;
-}
-
-.folder span{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 12px;
-  border-radius:10px;
-  background:rgba(40,80,160,.18);
-  border:1px solid rgba(120,170,255,.25);
-}
-
-.sub{
-  display:none;
-  margin-left:10px;
-  margin-top:6px;
-}
-
-.sub span{
-  display:flex;
-  padding:8px 12px;
+.sidebar h2{font-size:15px;margin-bottom:10px}
+.subject{
+  padding:10px;
   margin-bottom:6px;
-  border-radius:10px;
-  background:rgba(20,40,90,.3);
-  border:1px solid rgba(120,170,255,.18);
+  border-radius:8px;
+  background:rgba(40,80,160,.2);
 }
 
-/* ===== CONTENT ===== */
-.content{flex:1;padding:22px;overflow-y:auto}
-
-.search-wrap{
-  position:relative;
-  margin-bottom:18px;
+.content{
+  flex:1;
+  padding:20px;
 }
-
 .search{
   width:100%;
-  padding:14px 16px;
-  border-radius:14px;
-  font-size:16px;
-  color:#eaf2ff;
-  background:rgba(20,40,90,.45);
+  padding:14px;
+  border-radius:12px;
   border:1px solid rgba(120,170,255,.35);
+  background:rgba(20,40,90,.45);
+  color:#fff;
   outline:none;
 }
-
 .results{
-  margin-top:12px;
-  background:rgba(10,20,40,.55);
-  border-radius:16px;
+  margin-top:14px;
+  border-radius:14px;
   border:1px solid rgba(120,170,255,.3);
-  backdrop-filter:blur(14px);
+  background:rgba(10,20,40,.6);
 }
-
-.result-item{
-  padding:14px 16px;
+.result{
+  padding:14px;
   border-bottom:1px solid rgba(120,170,255,.15);
   cursor:pointer;
 }
-
-.result-item:last-child{border-bottom:none}
-
-.result-item small{opacity:.7;font-size:12px}
-
-.result-item:hover{background:rgba(60,120,255,.15)}
-
-/* ===== MOBILE ===== */
-@media(max-width:768px){
-  .sidebar{width:200px}
-}
+.result:last-child{border-bottom:none}
+.result:hover{background:rgba(60,120,255,.15)}
+.empty{padding:18px;opacity:.6}
 </style>
 </head>
+
 <body>
 
 <div class="topbar">
@@ -128,41 +75,17 @@ body{
 </div>
 
 <div class="app">
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <div class="sidebar">
     <h2>Subjects</h2>
+    <div id="subjects"></div>
+  </div>
 
-    <div class="folder" onclick="toggle(this)">
-      <span>📁 Physics</span>
-      <div class="sub">
-        <span onclick="openNote('phy-f-ch1-mechanics')">Formula</span>
-        <span onclick="openNote('phy-n-ch2-optics')">Notes</span>
-      </div>
-    </div>
-  </aside>
-
-  <!-- CONTENT -->
-  <main class="content">
-    <div class="search-wrap">
-      <input id="searchBox" class="search" placeholder="Search (e.g. phy-c-ch1)" />
-    </div>
-
-    <div class="results" id="noteList"></div>
-  </main>
-
+  <div class="content">
+    <input id="search" class="search" placeholder="Search notes...">
+    <div id="results" class="results"></div>
+  </div>
 </div>
 
 <script type="module" src="app.js"></script>
-<script>
-function toggle(el){
-  const sub=el.querySelector('.sub');
-  if(sub) sub.style.display=sub.style.display==='block'?'none':'block';
-}
-function openNote(id){
-  window.location.href=`notes.html?id=${id}`;
-}
-</script>
-
 </body>
 </html>
