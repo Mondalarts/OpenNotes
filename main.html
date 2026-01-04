@@ -39,6 +39,10 @@ body{
   margin-bottom:6px;
   border-radius:8px;
   background:rgba(40,80,160,.2);
+  cursor:pointer;
+}
+.subject.active{
+  outline:2px solid rgba(120,170,255,.6);
 }
 
 .content{
@@ -63,41 +67,31 @@ body{
 .result{
   padding:14px;
   border-bottom:1px solid rgba(120,170,255,.15);
-  cursor:pointer;
 }
 .result:last-child{border-bottom:none}
-.result:hover{background:rgba(60,120,255,.15)}
 .empty{padding:18px;opacity:.6}
 
-/* CREATE BUTTON (UIVERSE STYLE) */
+/* CREATE BUTTON */
 .create-float{
   position:fixed;
   right:20px;
   bottom:20px;
   z-index:50;
 }
-.box-button {
-  cursor: pointer;
-  border: 4px solid black;
-  background-color: gray;
-  padding-bottom: 10px;
-  transition: 0.1s ease-in-out;
-  user-select: none;
+.box-button{
+  cursor:pointer;
+  border:4px solid black;
+  background-color:gray;
+  padding-bottom:10px;
 }
-.button {
-  background-color: #dddddd;
-  border: 4px solid #fff;
-  padding: 3px 8px;
+.button{
+  background-color:#dddddd;
+  border:4px solid #fff;
+  padding:3px 8px;
 }
-.button span {
-  font-size: 1.1em;
-  letter-spacing: 1px;
-  color: #000;
-}
-.box-button:active {
-  padding: 0;
-  margin-bottom: 10px;
-  transform: translateY(10px);
+.button span{
+  color:#000;
+  font-size:1.1em;
 }
 
 /* OVERLAY + POPUP */
@@ -118,13 +112,22 @@ body{
   border:2px solid #6fa8ff;
   border-radius:14px;
   padding:20px;
-  width:220px;
+  width:240px;
   display:none;
   z-index:70;
 }
 #createPopup h3{
-  margin-bottom:12px;
   text-align:center;
+  margin-bottom:10px;
+}
+#createPopup input{
+  width:100%;
+  margin-bottom:8px;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #6fa8ff;
+  background:#020617;
+  color:#fff;
 }
 #createPopup button{
   width:100%;
@@ -134,19 +137,13 @@ body{
   color:#fff;
   border:none;
   border-radius:8px;
-  cursor:pointer;
-}
-#createPopup button:hover{
-  background:#2563eb;
 }
 </style>
 </head>
 
 <body>
 
-<div class="topbar">
-  <h1>OPENNOTES</h1>
-</div>
+<div class="topbar"><h1>OPENNOTES</h1></div>
 
 <div class="app">
   <div class="sidebar">
@@ -160,17 +157,19 @@ body{
   </div>
 </div>
 
-<!-- CREATE FLOAT BUTTON -->
+<!-- CREATE BUTTON -->
 <div id="createBtn" class="box-button create-float">
   <div class="button"><span>CREATE</span></div>
 </div>
 
-<!-- BLUR -->
 <div id="overlay"></div>
 
-<!-- POPUP -->
+<!-- CREATE POPUP -->
 <div id="createPopup">
   <h3>Create</h3>
+  <input id="inputSubject" placeholder="Subject name">
+  <input id="inputFolder" placeholder="Folder name (optional)">
+  <input id="inputTitle" placeholder="Note title (optional)">
   <button onclick="createSubject()">+ New Subject</button>
   <button onclick="createFolder()">+ New Folder</button>
   <button onclick="createNote()">+ New Note</button>
