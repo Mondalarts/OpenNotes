@@ -6,7 +6,7 @@ import {
   addDoc
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-/* 🔴 FIREBASE CONFIG — নিজেরটা বসা */
+/* 🔴 FIREBASE CONFIG (নিজেরটা বসা) */
 const firebaseConfig = {
   apiKey: "PASTE_API_KEY",
   authDomain: "PASTE_AUTH_DOMAIN",
@@ -20,52 +20,48 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 /* DOM */
-const search = document.getElementById("search");
-const results = document.getElementById("results");
-const subjectsBox = document.getElementById("subjects");
+const subjectsBox=document.getElementById("subjects");
+const search=document.getElementById("search");
+const results=document.getElementById("results");
 
 /* STATE */
-let NOTES = [];
-let SUBJECTS = new Set();
-let ACTIVE_SUBJECT = null;
+let NOTES=[];
+let SUBJECTS=new Set();
+let ACTIVE_SUBJECT=null;
 
-/* LOAD ALL NOTES */
+/* LOAD */
 async function loadNotes(){
-  NOTES = [];
+  NOTES=[];
   SUBJECTS.clear();
 
-  const snap = await getDocs(collection(db,"notes"));
+  const snap=await getDocs(collection(db,"notes"));
   snap.forEach(d=>{
-    const n = d.data();
-    NOTES.push({ id:d.id, ...n });
+    const n=d.data();
+    NOTES.push({id:d.id,...n});
     if(n.subject) SUBJECTS.add(n.subject);
   });
 
   renderSubjects();
-  results.innerHTML = "<div class='empty'>Select a subject or search</div>";
+  results.innerHTML="<div class='empty'>Select a subject or search</div>";
 }
 
 /* RENDER SUBJECTS */
 function renderSubjects(){
   subjectsBox.innerHTML="";
-
-  if(SUBJECTS.size === 0){
-    subjectsBox.innerHTML = "<div class='empty'>No subjects</div>";
+  if(SUBJECTS.size===0){
+    subjectsBox.innerHTML="<div class='empty'>No subjects</div>";
     return;
   }
 
   SUBJECTS.forEach(s=>{
-    const div = document.createElement("div");
-    div.className = "subject";
-    div.textContent = s;
+    const div=document.createElement("div");
+    div.className="subject";
+    if(ACTIVE_SUBJECT===s) div.classList.add("active");
+    div.textContent=s;
 
-    if(ACTIVE_SUBJECT === s){
-      div.style.outline = "2px solid rgba(120,170,255,.6)";
-    }
-
-    div.onclick = () => {
-      ACTIVE_SUBJECT = s;
-      search.value = "";
+    div.onclick=()=>{
+      ACTIVE_SUBJECT=s;
+      search.value="";
       showNotesBySubject(s);
       renderSubjects();
     };
@@ -74,92 +70,84 @@ function renderSubjects(){
   });
 }
 
-/* SHOW NOTES BY SUBJECT */
+/* SHOW NOTES */
 function showNotesBySubject(subject){
   results.innerHTML="";
-
-  const list = NOTES.filter(n => n.subject === subject);
-
-  if(list.length === 0){
-    results.innerHTML = "<div class='result'>No notes in this subject</div>";
+  const list=NOTES.filter(n=>n.subject===subject);
+  if(list.length===0){
+    results.innerHTML="<div class='result'>No notes</div>";
     return;
   }
-
   list.forEach(n=>{
-    const div = document.createElement("div");
-    div.className = "result";
-    div.innerHTML = `
-      <b>${n.title || "Untitled"}</b><br>
-      <small>${n.subject || ""}${n.folder ? " → "+n.folder : ""}</small>
-    `;
+    const div=document.createElement("div");
+    div.className="result";
+    div.innerHTML=`<b>${n.title||"Untitled"}</b><br>
+    <small>${n.subject}${n.folder?" → "+n.folder:""}</small>`;
     results.appendChild(div);
   });
 }
 
-/* SEARCH (SUBJECT-AWARE) */
+/* SEARCH */
 search.addEventListener("input",()=>{
-  const q = search.value.trim().toLowerCase();
+  const q=search.value.trim().toLowerCase();
   results.innerHTML="";
   if(!q) return;
 
-  const base = ACTIVE_SUBJECT
-    ? NOTES.filter(n => n.subject === ACTIVE_SUBJECT)
+  const base=ACTIVE_SUBJECT
+    ? NOTES.filter(n=>n.subject===ACTIVE_SUBJECT)
     : NOTES;
 
-  const found = base.filter(n =>
-    (n.title || "").toLowerCase().includes(q) ||
-    (n.content || "").toLowerCase().includes(q) ||
-    (n.folder || "").toLowerCase().includes(q)
+  const found=base.filter(n=>
+    (n.title||"").toLowerCase().includes(q) ||
+    (n.folder||"").toLowerCase().includes(q)
   );
 
-  if(found.length === 0){
-    results.innerHTML = "<div class='result'>No notes found</div>";
+  if(found.length===0){
+    results.innerHTML="<div class='result'>No notes found</div>";
     return;
   }
 
   found.forEach(n=>{
-    const div = document.createElement("div");
-    div.className = "result";
-    div.innerHTML = `
-      <b>${n.title || "Untitled"}</b><br>
-      <small>${n.subject || ""}${n.folder ? " → "+n.folder : ""}</small>
-    `;
+    const div=document.createElement("div");
+    div.className="result";
+    div.innerHTML=`<b>${n.title||"Untitled"}</b><br>
+    <small>${n.subject}${n.folder?" → "+n.folder:""}</small>`;
     results.appendChild(div);
   });
 });
 
-/* CREATE FUNCTIONS (POPUP) */
-window.createSubject = async () => {
-  const subject = document.getElementById("inputSubject").value.trim();
+/* CREATE */
+window.createSubject=async()=>{
+  const el=document.getElementById("inputSubject");
+  const subject=el.value.trim();
   if(!subject) return alert("Enter subject name");
 
-  await addDoc(collection(db,"notes"), { subject });
-  clearInputs(); closePopup(); loadNotes();
+  await addDoc(collection(db,"notes"),{subject});
+  el.value="";
+  closePopup();
+  loadNotes();
 };
 
-window.createFolder = async () => {
-  const subject = document.getElementById("inputSubject").value.trim();
-  const folder = document.getElementById("inputFolder").value.trim();
-  if(!subject || !folder) return alert("Enter subject & folder");
+window.createFolder=async()=>{
+  const subject=document.getElementById("inputSubject").value.trim();
+  const folder=document.getElementById("inputFolder").value.trim();
+  if(!subject||!folder) return alert("Enter subject & folder");
 
-  await addDoc(collection(db,"notes"), { subject, folder });
-  clearInputs(); closePopup(); loadNotes();
+  await addDoc(collection(db,"notes"),{subject,folder});
+  document.getElementById("inputFolder").value="";
+  closePopup();
+  loadNotes();
 };
 
-window.createNote = async () => {
-  const title = document.getElementById("inputTitle").value.trim();
+window.createNote=async()=>{
+  const title=document.getElementById("inputTitle").value.trim();
   if(!title) return alert("Enter note title");
 
-  await addDoc(collection(db,"notes"), { title });
-  clearInputs(); closePopup(); loadNotes();
-};
-
-/* HELPERS */
-function clearInputs(){
-  document.getElementById("inputSubject").value="";
-  document.getElementById("inputFolder").value="";
+  await addDoc(collection(db,"notes"),{title});
   document.getElementById("inputTitle").value="";
-}
+  closePopup();
+  loadNotes();
+};
 
 /* INIT */
 loadNotes();
