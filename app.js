@@ -1,153 +1,121 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  addDoc
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
 
-/* 🔴 FIREBASE CONFIG (নিজেরটা বসা) */
 const firebaseConfig = {
-  apiKey: "PASTE_API_KEY",
-  authDomain: "PASTE_AUTH_DOMAIN",
-  projectId: "PASTE_PROJECT_ID",
-  storageBucket: "PASTE_STORAGE_BUCKET",
-  messagingSenderId: "PASTE_SENDER_ID",
-  appId: "PASTE_APP_ID"
+  apiKey: "AIzaSyDV0x3hXbyTLXwFytOuPgK7lNMnv_PonfA",
+  authDomain: "ep13-85d3a.firebaseapp.com",
+  projectId: "ep13-85d3a",
+  storageBucket: "ep13-85d3a.appspot.com",
+  appId: "1:92916303653:web:5f06a01139ea688de9fccc"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
-/* DOM */
-const subjectsBox=document.getElementById("subjects");
-const search=document.getElementById("search");
+const sidebar=document.getElementById("sidebar");
 const results=document.getElementById("results");
+const popup=document.getElementById("popup");
 
-/* STATE */
 let NOTES=[];
-let SUBJECTS=new Set();
 let ACTIVE_SUBJECT=null;
+let ACTIVE_NOTE=null;
 
-/* LOAD */
+loadNotes();
+
 async function loadNotes(){
-  NOTES=[];
-  SUBJECTS.clear();
-
   const snap=await getDocs(collection(db,"notes"));
-  snap.forEach(d=>{
-    const n=d.data();
-    NOTES.push({id:d.id,...n});
-    if(n.subject) SUBJECTS.add(n.subject);
-  });
-
+  NOTES=snap.docs.map(d=>({id:d.id,...d.data()}));
   renderSubjects();
-  results.innerHTML="<div class='empty'>Select a subject or search</div>";
 }
 
-/* RENDER SUBJECTS */
 function renderSubjects(){
-  subjectsBox.innerHTML="";
-  if(SUBJECTS.size===0){
-    subjectsBox.innerHTML="<div class='empty'>No subjects</div>";
-    return;
-  }
-
-  SUBJECTS.forEach(s=>{
+  sidebar.innerHTML="";
+  [...new Set(NOTES.map(n=>n.subject))].forEach(s=>{
     const div=document.createElement("div");
     div.className="subject";
-    if(ACTIVE_SUBJECT===s) div.classList.add("active");
     div.textContent=s;
-
-    div.onclick=()=>{
-      ACTIVE_SUBJECT=s;
-      search.value="";
-      showNotesBySubject(s);
-      renderSubjects();
+    div.onclick=()=>{ACTIVE_SUBJECT=s;showNotes()};
+    div.oncontextmenu=e=>{
+      e.preventDefault();
+      if(confirm("Delete subject?")){
+        NOTES.filter(n=>n.subject===s)
+          .forEach(n=>deleteDoc(doc(db,"notes",n.id)));
+        loadNotes();
+      }
     };
-
-    subjectsBox.appendChild(div);
+    sidebar.appendChild(div);
   });
 }
 
-/* SHOW NOTES */
-function showNotesBySubject(subject){
+function showNotes(){
   results.innerHTML="";
-  const list=NOTES.filter(n=>n.subject===subject);
-  if(list.length===0){
-    results.innerHTML="<div class='result'>No notes</div>";
-    return;
-  }
-  list.forEach(n=>{
-    const div=document.createElement("div");
-    div.className="result";
-    div.innerHTML=`<b>${n.title||"Untitled"}</b><br>
-    <small>${n.subject}${n.folder?" → "+n.folder:""}</small>`;
-    results.appendChild(div);
-  });
+  NOTES.filter(n=>n.subject===ACTIVE_SUBJECT)
+    .forEach(n=>{
+      const d=document.createElement("div");
+      d.className="result";
+      d.textContent=n.title||"Untitled";
+      d.onclick=()=>openNote(n);
+      results.appendChild(d);
+    });
 }
 
-/* SEARCH */
-search.addEventListener("input",()=>{
-  const q=search.value.trim().toLowerCase();
+function openNote(n){
+  ACTIVE_NOTE=n;
+  editor.style.display="block";
+  noteTitle.value=n.title||"";
+  noteContent.value=n.content||"";
+  imagePreview.innerHTML=n.image?`<img src="${n.image}">`:"";
+}
+
+search.oninput=()=>{
+  const q=search.value.toLowerCase();
   results.innerHTML="";
-  if(!q) return;
+  NOTES.filter(n=>n.title?.toLowerCase().includes(q))
+    .forEach(n=>{
+      const d=document.createElement("div");
+      d.className="result";
+      d.textContent=n.title;
+      results.appendChild(d);
+    });
+};
 
-  const base=ACTIVE_SUBJECT
-    ? NOTES.filter(n=>n.subject===ACTIVE_SUBJECT)
-    : NOTES;
+createBtn.onclick=()=>popup.style.display="flex";
+window.closePopup=()=>popup.style.display="none";
 
-  const found=base.filter(n=>
-    (n.title||"").toLowerCase().includes(q) ||
-    (n.folder||"").toLowerCase().includes(q)
-  );
+btnSubject.onclick=async()=>{
+  const s=inputSubject.value.trim();
+  if(!s)return;
+  await addDoc(collection(db,"notes"),{subject:s});
+  closePopup();loadNotes();
+};
 
-  if(found.length===0){
-    results.innerHTML="<div class='result'>No notes found</div>";
-    return;
-  }
-
-  found.forEach(n=>{
-    const div=document.createElement("div");
-    div.className="result";
-    div.innerHTML=`<b>${n.title||"Untitled"}</b><br>
-    <small>${n.subject}${n.folder?" → "+n.folder:""}</small>`;
-    results.appendChild(div);
+btnFolder.onclick=async()=>{
+  if(!ACTIVE_SUBJECT)return alert("Select subject");
+  await addDoc(collection(db,"notes"),{
+    subject:ACTIVE_SUBJECT,
+    folder:inputFolder.value||"General"
   });
-});
-
-/* CREATE */
-window.createSubject=async()=>{
-  const el=document.getElementById("inputSubject");
-  const subject=el.value.trim();
-  if(!subject) return alert("Enter subject name");
-
-  await addDoc(collection(db,"notes"),{subject});
-  el.value="";
-  closePopup();
-  loadNotes();
+  closePopup();loadNotes();
 };
 
-window.createFolder=async()=>{
-  const subject=document.getElementById("inputSubject").value.trim();
-  const folder=document.getElementById("inputFolder").value.trim();
-  if(!subject||!folder) return alert("Enter subject & folder");
-
-  await addDoc(collection(db,"notes"),{subject,folder});
-  document.getElementById("inputFolder").value="";
-  closePopup();
-  loadNotes();
+btnNote.onclick=async()=>{
+  if(!ACTIVE_SUBJECT)return;
+  await addDoc(collection(db,"notes"),{
+    subject:ACTIVE_SUBJECT,
+    folder:inputFolder.value||"",
+    title:inputTitle.value||"New Note",
+    content:""
+  });
+  closePopup();loadNotes();
 };
 
-window.createNote=async()=>{
-  const title=document.getElementById("inputTitle").value.trim();
-  if(!title) return alert("Enter note title");
-
-  await addDoc(collection(db,"notes"),{title});
-  document.getElementById("inputTitle").value="";
-  closePopup();
-  loadNotes();
+imageInput.onchange=async()=>{
+  const file=imageInput.files[0];
+  if(!file||!ACTIVE_NOTE)return;
+  const r=ref(storage,"images/"+Date.now());
+  await uploadBytes(r,file);
+  const url=await getDownloadURL(r);
+  imagePreview.innerHTML=`<img src="${url}">`;
 };
-
-/* INIT */
-loadNotes();
