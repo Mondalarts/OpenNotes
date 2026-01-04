@@ -6,191 +6,131 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{
-  height:100vh;
+  margin:0;
+  font-family:system-ui;
   background:radial-gradient(circle at top,#0d1b2a,#000);
   color:#eaf2ff;
+  height:100vh;
+  overflow:hidden;
 }
-
-/* TOP BAR */
-.topbar{
-  height:56px;
-  display:flex;
-  align-items:center;
-  padding:0 20px;
-  background:rgba(20,30,50,.7);
-  border-bottom:1px solid rgba(120,170,255,.25);
+header{
+  padding:14px 20px;
+  border-bottom:1px solid #1f3b5b;
+  font-size:22px;
+  font-weight:700;
 }
-.topbar h1{font-size:18px}
-
-/* LAYOUT */
-.app{display:flex;height:calc(100vh - 56px)}
-
-.sidebar{
+#layout{display:flex;height:calc(100vh - 60px);}
+#sidebar{
   width:260px;
-  padding:16px;
-  background:rgba(10,20,40,.6);
-  border-right:1px solid rgba(120,170,255,.25);
+  border-right:1px solid #1f3b5b;
+  padding:10px;
 }
-.sidebar h2{font-size:15px;margin-bottom:10px}
 .subject{
   padding:10px;
-  margin-bottom:6px;
-  border-radius:8px;
-  background:rgba(40,80,160,.2);
+  border-radius:10px;
   cursor:pointer;
 }
-.subject.active{
-  outline:2px solid rgba(120,170,255,.6);
-}
-
-.content{
-  flex:1;
-  padding:20px;
-}
-.search{
+.subject:hover{background:#142b45}
+#main{flex:1;padding:20px}
+#search{
   width:100%;
   padding:14px;
-  border-radius:12px;
-  border:1px solid rgba(120,170,255,.35);
-  background:rgba(20,40,90,.45);
+  border-radius:14px;
+  border:none;
+  background:#08121f;
   color:#fff;
   outline:none;
 }
-.results{
-  margin-top:14px;
-  border-radius:14px;
-  border:1px solid rgba(120,170,255,.3);
-  background:rgba(10,20,40,.6);
-}
 .result{
   padding:14px;
-  border-bottom:1px solid rgba(120,170,255,.15);
+  margin-top:10px;
+  background:#0b1d33;
+  border-radius:14px;
+  cursor:pointer;
 }
-.result:last-child{border-bottom:none}
-.empty{padding:18px;opacity:.6}
-
-/* CREATE BUTTON */
-.create-float{
+#createBtn{
   position:fixed;
   right:20px;
   bottom:20px;
-  z-index:50;
-}
-.box-button{
+  padding:14px 20px;
+  border-radius:16px;
+  background:#1e3a8a;
   cursor:pointer;
-  border:4px solid black;
-  background-color:gray;
-  padding-bottom:10px;
 }
-.button{
-  background-color:#dddddd;
-  border:4px solid #fff;
-  padding:3px 8px;
-}
-.button span{
-  color:#000;
-  font-size:1.1em;
-}
-
-/* OVERLAY + POPUP */
-#overlay{
+#popup{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.45);
   backdrop-filter:blur(8px);
   display:none;
-  z-index:60;
+  align-items:center;
+  justify-content:center;
 }
-#createPopup{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  background:#0d1b2a;
-  border:2px solid #6fa8ff;
-  border-radius:14px;
+#box{
+  background:#020617;
   padding:20px;
-  width:240px;
-  display:none;
-  z-index:70;
+  border-radius:20px;
+  width:300px;
 }
-#createPopup h3{
-  text-align:center;
-  margin-bottom:10px;
-}
-#createPopup input{
+#box input,#box textarea{
   width:100%;
-  margin-bottom:8px;
-  padding:10px;
-  border-radius:8px;
-  border:1px solid #6fa8ff;
+  margin-bottom:10px;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #2a4a7a;
   background:#020617;
   color:#fff;
 }
-#createPopup button{
+button{
   width:100%;
-  margin-bottom:8px;
-  padding:10px;
-  background:#1e3a8a;
-  color:#fff;
+  padding:12px;
+  border-radius:12px;
   border:none;
-  border-radius:8px;
+  background:#2563eb;
+  color:#fff;
+  cursor:pointer;
+}
+.noteEditor{
+  margin-top:20px;
+}
+.noteEditor img{
+  max-width:100%;
+  border-radius:12px;
 }
 </style>
 </head>
 
 <body>
+<header>OPENNOTES</header>
 
-<div class="topbar"><h1>OPENNOTES</h1></div>
+<div id="layout">
+  <div id="sidebar"></div>
+  <div id="main">
+    <input id="search" placeholder="Search notes...">
+    <div id="results"></div>
 
-<div class="app">
-  <div class="sidebar">
-    <h2>Subjects</h2>
-    <div id="subjects"></div>
+    <div class="noteEditor" id="editor" style="display:none">
+      <input id="noteTitle" placeholder="Title">
+      <textarea id="noteContent" rows="6" placeholder="Write note..."></textarea>
+      <input type="file" id="imageInput">
+      <div id="imagePreview"></div>
+    </div>
   </div>
+</div>
 
-  <div class="content">
-    <input id="search" class="search" placeholder="Search notes...">
-    <div id="results" class="results"></div>
+<div id="createBtn">CREATE</div>
+
+<div id="popup">
+  <div id="box">
+    <input id="inputSubject" placeholder="Subject">
+    <input id="inputFolder" placeholder="Folder (optional)">
+    <input id="inputTitle" placeholder="Note title (optional)">
+    <button id="btnSubject">+ New Subject</button>
+    <button id="btnFolder">+ New Folder</button>
+    <button id="btnNote">+ New Note</button>
+    <button onclick="closePopup()">Cancel</button>
   </div>
 </div>
-
-<!-- CREATE BUTTON -->
-<div id="createBtn" class="box-button create-float">
-  <div class="button"><span>CREATE</span></div>
-</div>
-
-<div id="overlay"></div>
-
-<!-- CREATE POPUP -->
-<div id="createPopup">
-  <h3>Create</h3>
-  <input id="inputSubject" placeholder="Subject name">
-  <input id="inputFolder" placeholder="Folder name (optional)">
-  <input id="inputTitle" placeholder="Note title (optional)">
-  <button onclick="createSubject()">+ New Subject</button>
-  <button onclick="createFolder()">+ New Folder</button>
-  <button onclick="createNote()">+ New Note</button>
-</div>
-
-<script>
-const createBtn=document.getElementById("createBtn");
-const overlay=document.getElementById("overlay");
-const popup=document.getElementById("createPopup");
-
-createBtn.onclick=()=>{
-  overlay.style.display="block";
-  popup.style.display="block";
-};
-overlay.onclick=closePopup;
-
-function closePopup(){
-  overlay.style.display="none";
-  popup.style.display="none";
-}
-</script>
 
 <script type="module" src="app.js"></script>
 </body>
